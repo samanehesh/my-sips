@@ -1,0 +1,47 @@
+﻿@model Sips.ViewModels.ContactVM
+
+@{
+    ViewData["Title"] = "ContactDelete";
+}
+
+<div class="contact-container">
+<h1>Delete Contact</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>@Model.Email</h4>
+    <hr />
+    <div>
+        @Html.DisplayNameFor(model => model.FirstName):
+        @Html.DisplayFor(model => model.FirstName)<br />
+        @Html.DisplayNameFor(model => model.LastName):
+        @Html.DisplayFor(model => model.LastName)<br />
+        @Html.DisplayNameFor(model => model.BirthDate):
+        @Html.DisplayFor(model => model.BirthDate)<br />
+        @Html.DisplayNameFor(model => model.Email):
+        @Html.DisplayFor(model => model.Email)<br />
+        @Html.DisplayNameFor(model => model.PhoneNumber):
+        @Html.DisplayFor(model => model.PhoneNumber)<br />
+        @Html.DisplayNameFor(model => model.Unit):
+        @Html.DisplayFor(model => model.Unit)<br />
+        @Html.DisplayNameFor(model => model.Street):
+        @Html.DisplayFor(model => model.Street)<br />
+        @Html.DisplayNameFor(model => model.City):
+        @Html.DisplayFor(model => model.City)<br />
+        @Html.DisplayNameFor(model => model.Province):
+        @Html.DisplayFor(model => model.Province)<br />
+        @Html.DisplayNameFor(model => model.PostalCode):
+        @Html.DisplayFor(model => model.PostalCode)
+    </div>
+    
+    <form asp-action="ContactDelete">
+        <input type="hidden" asp-for="UserId" />
+        <input type="submit" value="Delete" class="btn btn-danger" />
+    </form>
+
+
+    <div class="back-btn">
+<a asp-action="ContactIndex">Back to List</a>
+</div>
+</div>
+</div>

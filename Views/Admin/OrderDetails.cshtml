@@ -1,0 +1,297 @@
+﻿@model Sips.ViewModels.OrderDetailVM
+
+@{
+    ViewData["Title"] = "OrderDetails";
+    int sweetnessPercent = 0; // Default value
+    string ice = "";
+    string milkCoice = "";
+    string addIn = "";
+    string addInName = "";
+
+
+}
+<div class="order-container">
+
+<h1>Details</h1>
+
+<div>
+    <hr />
+    <div class="order-info">
+        <p>
+        @Html.DisplayNameFor(model => model.TransactionId):
+                @Html.DisplayFor(model => model.TransactionId)
+            </p>
+        <p>
+        @Html.DisplayNameFor(model => model.UserEmail):
+            @Html.DisplayFor(model => model.UserEmail)</p>
+            <p>
+        @Html.DisplayNameFor(model => model.DateOrdered):
+            @Html.DisplayFor(model => model.DateOrdered)</p>
+            <p>
+        @Html.DisplayNameFor(model => model.totalPrice):
+            @Html.DisplayFor(model => model.totalPrice)</p>
+            <p>
+        @Html.DisplayNameFor(model => model.totalQuantity):
+            @Html.DisplayFor(model => model.totalQuantity)</p>
+            <p>
+        @Html.DisplayNameFor(model => model.StoreId):
+            @Html.DisplayFor(model => model.StoreId)</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Base Price</th>
+                        <th>Quantity</th>
+                        <th>Sweetness Percent</th>
+                        <th>Ice Choice</th>
+                        <th>Milk Choice</th>
+                        <th>Add-In IDs</th> <!-- New column header -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var itemType in Model.orderDetail)
+                    {
+                        addIn = "";
+
+                        // Initialize variables for sweetness percent, ice choice, and milk choice
+                        sweetnessPercent = itemType.SweetnessId switch
+                        {
+                            1 => 0,
+                            2 => 25,
+                            3 => 50,
+                            4 => 75,
+                            5 => 100,
+                            _ => 0 // Default to 0 if SweetnessId is not recognized
+                        };
+
+                        ice = itemType.IceId switch
+                        {
+                            1 => "No Ice",
+                            2 => "Less Ice",
+                            3 => "Regular Ice",
+                            4 => "Extra Ice",
+                            _ => "Unknown" // Default to "Unknown" if IceId is not recognized
+                        };
+
+                        milkCoice = itemType.MilkChoiceId switch
+                        {
+                            1 => "Regular",
+                            2 => "Soy",
+                            3 => "Almond",
+                            4 => "Oat",
+                            5 => "No Milk",
+                            _ => "Unknown" // Default to "Unknown" if MilkChoiceId is not recognized
+                        };
+
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => itemType.Item.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => itemType.Price)</td>
+                            <td>@Html.DisplayFor(modelItem => itemType.Quantity)</td>
+                            <td>@sweetnessPercent%</td>
+                            <td>@ice</td>
+                            <td>@milkCoice</td>
+                            @* <td> *@
+
+                            <td>
+                                <!-- Display add-in IDs for the current item type -->
+                                    @if (Model.addInIdsDictionary.ContainsKey(itemType.OrderDetailId))
+                                    {
+                                        var addInIds = Model.addInIdsDictionary[itemType.OrderDetailId];
+                                    if (addInIds.Count > 0)
+                                    {
+                                        foreach (var addInId in addInIds)
+                                        {
+                                            addInName = addInId switch
+                                            {
+                                                1 => "Pearls",
+                                                2 => "Sago",
+                                                3 => "Lyeechy-Jelly",
+                                                4 => "Pudding",
+                                                _ => "Unknown Add-In" // Default to "Unknown Add-In" if addInId is not recognized
+                                            };
+                                            @addInName
+                                            @:&nbsp; <!-- Vertical bar with a space -->
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @:No Add-In
+                                    }
+
+                                    }
+                            </td>
+
+
+
+
+
+
+@*                                 <!-- Display add-in IDs for the current order detail -->
+                                @if (Model.addInIds.Count == 0)
+                                {
+                                    addIn = "No Add-In";
+                                    @addIn
+
+                                }
+                                else
+                                {
+                                    foreach (var orderId in Model.addInIds)
+                                    {
+                                        addIn = orderId switch
+                                        {
+                                            1 => "Pearls",
+                                            2 => "Sago",
+                                            3 => "Lychee Jelly",
+                                            4 => "Pudding",
+                                            _ => "Unknown Add-In" // Default to "Unknown Add-In" if orderId is not recognized
+                                        };
+
+                                        @addIn
+                                        @:&nbsp; <!-- Vertical bar with a space -->
+                                    }
+                                }
+                            </td> *@
+                        </tr>
+                    }
+                </tbody>
+            </table><br />
+        <button id="refund-button" class="btn btn-danger">Process PayPal Refund</button>
+
+    </div>
+</div>
+
+<div class="back-btn">
+    <a asp-action="OrderIndex">Back to List</a>
+</div>
+</div>
+<div id="refundModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="refundModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white"
+                 style="background-color:rgba(var(--bs-primary-rgb),
+                     var(--bs-bg-opacity)) !important;">
+                <h5 class="modal-title" id="refundModalLabel">Refund Successful</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="refundModalBody">
+                <!-- Refund information will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeModalButton"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var refundButton = document.getElementById('refund-button');
+
+        if (refundButton) {
+            refundButton.addEventListener('click', function () {
+                var PaymentNotification = {
+                    PaymentId: '@ViewBag.PaymentNotification.PaymentId',
+                    Amount: '@ViewBag.PaymentNotification.Amount',
+                    CurrencyCode: '@ViewBag.PaymentNotification.CurrencyCode',
+                    CurrencySymbol: '@ViewBag.PaymentNotification.CurrencySymbol',
+                    PayerId: '@ViewBag.PaymentNotification.PayerId',
+                    CaptureId: '@ViewBag.PaymentNotification.CaptureId',
+                    PayerFullName: '@ViewBag.PaymentNotification.PayerFullName'
+                };
+
+                console.log('PaymentNotification ==> ' +
+                    JSON.stringify(PaymentNotification));
+
+                // Make fetch request to refund action method
+                fetch('/Admin/RefundAction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // Update Accept header to expect JSON
+                    },
+                    body: JSON.stringify(PaymentNotification)
+                })
+                    .then(function (response) {
+                        // Parse http response JSON
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        // Check if the necessary properties exist in the response
+                        if (data && data.id && data.status && data.paymentNotification) {
+                            document.getElementById('refundModalLabel').innerHTML = 'Refund Successful';
+
+                            // Construct refund information HTML
+                            var refundInfoHTML = '<p><strong class="text-primary">Status:</strong>\t\t' +
+                                data.status + '</p>' +
+                                '<p><strong class="text-primary">Refund ID:</strong>\t\t' +
+                                data.id + '</p>' +
+                                '<p><strong class="text-primary">Refund Amount:</strong>' +
+                                data.paymentNotification.currencySymbol +
+                                data.paymentNotification.amount + ' ' +
+                                data.paymentNotification.currencyCode + '</p>' +
+                                '<p><strong class="text-primary">Capture ID:</strong>' +
+                                data.paymentNotification.captureId + '</p>';
+
+                            // Set refund information HTML to modal body
+                            document.getElementById('refundModalBody').innerHTML = refundInfoHTML;
+
+                            // Show the modal after setting modal content
+                            var refundModal = new bootstrap.Modal(document.getElementById('refundModal'));
+                            refundModal.show();
+
+                            // Add event listener to modal close button
+                            var closeButton = document.getElementById('closeModalButton');
+                            closeButton.addEventListener('click', function () {
+                                // Redirect after modal is closed
+                                window.location.href = '/Admin/OrderIndex';
+                            });
+                        } else {
+                            // Handle processing error
+                            document.getElementById('refundModalLabel').innerHTML = 'Refund failed';
+
+                            var errorObject = JSON.parse(data.error);
+                            var refundInfoHTML = '<h5>' + errorObject.message + '</h5><br/>' +
+                                '<p><strong>Status:</strong>\t\t' +
+                                errorObject.name + '</p>' +
+                                '<p><strong>Issue:</strong>\t\t' +
+                                errorObject.details[0].issue + '</p>' +
+                                '<p><strong>Description:</strong>\t\t' +
+                                errorObject.details[0].description + '</p>';
+
+                            // Set refund information HTML to modal body
+                            document.getElementById('refundModalBody').innerHTML = refundInfoHTML;
+
+                            // Show the modal
+                            var refundModal = new bootstrap.Modal(document.getElementById('refundModal'));
+                            refundModal.show();
+                        }
+                    })
+                    .catch(function (error) {
+                        // Handle errors
+                        console.error('Error occurred:', error);
+                        alert(error);
+                    });
+            });
+        }
+    });
+
+</script>
+
+<style>
+    table {
+        width: 100%; /* Set the table width to 100% of its container */
+        border-collapse: collapse; /* Collapse table borders */
+    }
+
+    th, td {
+        padding: 8px; /* Add padding to table cells */
+        text-align: left; /* Align cell content to the left */
+        border: 1px solid #ddd; /* Add border to cells */
+    }
+</style>
+

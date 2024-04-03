@@ -1,0 +1,117 @@
+﻿@model Sips.ViewModels.ItemVM
+
+@{
+    ViewData["Title"] = "ItemEdit";
+}
+
+<h1>Edit</h1>
+
+<h4>@Model.Name</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ItemEdit" method="post" enctype="multipart/form-data">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ItemId" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BasePrice" class="control-label"></label>
+                <input asp-for="BasePrice" class="form-control" />
+                <span asp-validation-for="BasePrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory" class="control-label"></label>
+                <input asp-for="Inventory" class="form-control" />
+                <span asp-validation-for="Inventory" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+            <label asp-for="ItemTypeId" class="control-label"></label>
+            <select asp-for="ItemTypeId" class="form-control" asp-items="ViewBag.ItemTypes">
+                    <option value="">Select from Item Type options</option>
+                </select>
+            <span asp-validation-for="ItemTypeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="hasMilk" class="control-label"></label>
+                <div>
+                    <label>
+                        <input asp-for="hasMilk" type="radio" value="true" />
+                        Yes
+                    </label>
+                    <label>
+                        <input asp-for="hasMilk" type="radio" value="false" />
+                        No
+                    </label>
+                </div>
+                <span asp-validation-for="hasMilk" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+               <input asp-for="ImageFile" style="display:none" id="ImageFile" class="form-control" type="file" accept="image/*"  />
+                @if (!string.IsNullOrEmpty(Model.ImageBase64))
+                {
+                    <img id="imagePreview" style="width:100px;height:100px;" src="data:image/jpeg;base64, @Model.ImageBase64" alt="Item Image" />
+                }
+                else
+                {
+                    <p>No image available</p>
+                }
+
+                <button type="button" class="btn-primary" onclick="selectImage()">Change Image</button>
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ItemIndex">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+
+<script>
+    function selectImage() {
+        // Trigger a click event on the hidden file input
+        document.getElementById('ImageFile').click();
+    }
+
+    // Update the image preview when a file is selected
+    document.getElementById('ImageFile').addEventListener('change', function () {
+        var fileInput = this;
+        var imagePreview = document.getElementById('imagePreview');
+
+        // Check if a file is selected
+        if (fileInput.files.length > 0) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Update the image source with the selected file
+                imagePreview.src = e.target.result;
+            };
+
+            // Read the selected file as a data URL
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            // No new file selected, keep the previous image or show a default image
+            imagePreview.src = 'data:image/jpeg;base64, @Model.ImageBase64'; // Replace with your default image or keep the previous image
+        }
+    });
+</script>

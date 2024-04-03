@@ -1,0 +1,45 @@
+﻿@model IEnumerable<Sips.ViewModels.UserRoleVM>
+
+@{
+    ViewData["Title"] = "User Roles Detail";
+    string message = ViewBag.Message;
+}
+<div class="product-container">
+
+<h3 class="role-title">User: @ViewBag.UserName</h3>
+
+@if (message.Length > 0)
+{
+    <div class="alert alert-success" role="alert">
+        @ViewBag.Message
+    </div>
+}
+<p>
+    @Html.ActionLink( "Assign Roles"
+    , "Create"
+    , new { userName = @ViewBag.UserName })
+</p>
+
+<table class="table" id="user-role-detail-table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.RoleName)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RoleName)
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    @Html.ActionLink("Delete", "Delete", new
+                { roleName = item.RoleName, email = item.Email})
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-action="Index">Back to List</a>
+</div>

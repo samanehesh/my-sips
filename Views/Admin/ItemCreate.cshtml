@@ -1,0 +1,99 @@
+﻿@model Sips.ViewModels.ItemVM
+
+@{
+    ViewData["Title"] = "ItemCreate";
+
+}
+
+<h1>Add New Product</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ItemCreate" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BasePrice" class="control-label"></label>
+                <input asp-for="BasePrice" class="form-control" />
+                <span asp-validation-for="BasePrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory" class="control-label"></label>
+                <input asp-for="Inventory" class="form-control" />
+                <span asp-validation-for="Inventory" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ItemTypeId" class="control-label"></label>
+                <select asp-for="ItemTypeId" class="form-control" asp-items="ViewBag.ItemTypes">
+                    <option value="">Select from Item Type options</option>
+                </select>  
+                <span asp-validation-for="ItemTypeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="hasMilk" class="control-label"></label>
+                <div>
+                    <label>
+                        <input asp-for="hasMilk" type="radio" value="true" />
+                        Yes
+                    </label>
+                    <label>
+                        <input asp-for="hasMilk" type="radio" value="false" />
+                        No
+                    </label>
+                </div>                
+                <span asp-validation-for="hasMilk" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" id="ImageFile"
+                    type="file" accept="image/*" />
+                <span asp-validation-for="ImageFile" id="fileMessage" class="text-danger"></span>
+                <br />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <input onclick="validateForm()" type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<br />
+
+<div>
+    <a asp-action="ItemIndex">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+
+    function validateForm() {
+        var fileInput = document.getElementById('ImageFile');
+
+        if (fileInput.files.length === 0) {
+
+            document.getElementById('fileMessage').textContent = 'The Image File field is required.'
+            // Prevent form submission
+            return false;
+        }
+        document.getElementById('fileMessage').textContent = ''
+
+        // Allow form submission if the file input is not empty
+        return true;
+    }
+</script>

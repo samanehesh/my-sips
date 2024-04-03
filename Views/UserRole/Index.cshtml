@@ -1,0 +1,69 @@
+﻿@model PaginatedList<Sips.ViewModels.UserVM>
+
+@{
+    ViewData["Title"] = "User Roles";
+}
+<div class="product-container">
+    <h1>User Roles</h1>
+
+
+
+<table class="table" id="user-role-index">
+    <form asp-action="Index" method="get">
+        <div class="form-actions no-color" id="form-input">
+            <p>
+                <div class="form-group" style="display: inline-block">
+                    <span>Search User Email:</span>
+                    <input type="text" name="SearchString"
+                           value="@ViewData["currentFilter"]" required
+                           class="user-search-input" />
+                </div>
+                <div class="form-group" style="display: inline-block">
+                    <input type="submit" value="Search"
+                           class="btn btn-primary " id="search-button"/>
+                </div>
+                <a asp-action="Index" id="back-to-list">Back to Full List</a>
+            </p>
+        </div>
+    </form>
+
+    <thead>
+        <tr>
+            <th>
+                @Html.ActionLink("Users", "Index", new { sortOrder = ViewBag.NameSortParm })
+            </th>
+            <th><a asp-action="Create">Create New User Role</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td style="color: #519389">@item.Email</td>
+                <td style="color: #519389">
+                    @Html.ActionLink( "View Roles"
+                , "Detail"
+                , new { userName = item.Email })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<nav>
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link pagination-btn"
+               href="@Url.Action("Index", new { pageNumber = Model.PageIndex - 1 })">
+                Previous
+            </a>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link pagination-btn"
+               href="@Url.Action("Index", new { pageNumber = Model.PageIndex + 1 })">
+                Next
+            </a>
+        </li>
+    </ul>
+</nav>
+<a asp-controller="Admin" asp-action="RoleIndex">Back</a>
+</div>

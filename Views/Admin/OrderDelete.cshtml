@@ -1,0 +1,40 @@
+﻿@model Sips.ViewModels.OrderDetailVM
+
+@{
+    ViewData["Title"] = "OrderDelete";
+}
+
+<h1>Order Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Order for @Model.UserEmail</h4>
+    <hr />
+    <div style="display:flex; flex-direction:row; margin-left:100px;">
+
+        <div style="text-align:left;margin-top:50px;">
+            @Html.DisplayNameFor(model => model.DateOrdered):
+            @Html.DisplayFor(model => model.DateOrdered)<br />
+
+            @Html.DisplayNameFor(model => model.totalPrice):
+            @Html.DisplayFor(model => model.totalPrice)<br />
+
+            @Html.DisplayNameFor(model => model.TransactionId):
+            @Html.DisplayFor(model => model.TransactionId)<br />
+
+@*             @Html.DisplayNameFor(model => model.Inventory):
+            @Html.DisplayFor(model => model.Inventory)<br />
+
+            @Html.DisplayNameFor(model => model.ItemTypeName):
+            @Html.DisplayFor(model => model.ItemTypeName)<br /> *@
+
+
+
+        </div>
+    </div>
+    <form asp-action="OrderDelete">
+        <input type="hidden" asp-for="TransactionId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="OrderIndex">Back to List</a>
+    </form>
+</div>

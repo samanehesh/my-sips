@@ -1,0 +1,114 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="banner-container">
+    <!-- Slick Carousel -->
+    <div id="slick-carousel" class="slick-carousel">
+        <div><img src="./images/carousel-img-1.jpg" alt="Slide 1"></div>
+        <div><img src="./images/carousel-img-2.jpg" alt="Slide 2"></div>
+        <div><img src="./images/carousel-img-3.jpg" alt="Slide 3"></div>
+        <div><img src="./images/carousel-img-4.jpg" alt="Slide 3"></div>
+    </div>
+
+    <div class="banner-overlay">
+        <div class="banner-heading">
+            <h1 class="main-heading">Welcome to Sips!</h1>
+
+
+        <div class="banner-btns">
+            <a href="/Identity/Account/Register" class="banner-cta register-btn">Create Account</a>
+            <a href="/Home/About" class="banner-cta learn-more-btn">Learn More</a>
+        </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="subheading">Our Teas</h2>
+<div class="drink-images">
+    <div class="row">
+        <div class="col-md-4">
+            <a href="@Url.Action("MilkTea", "Menu")" class="index-image-container">
+                <img src="~/images/milk.jpg" alt="Milk Tea" class="img-fluid">
+                <h4>Milk Teas</h4>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="@Url.Action("FruitTea1", "Menu")" class="index-image-container">
+                <img src="~/images/fruit.jpg" alt="Fruit Tea" class="img-fluid">
+                <h4>Fruit Teas</h4>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="@Url.Action("Slush", "Menu")" class="index-image-container">
+                <img src="~/images/slushie.jpg" alt="Slush" class="img-fluid">
+                <h4>Slushes</h4>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<div class="home-about-container">
+    <div class="home-boba-img">
+        <img src="/images/home-02.png" alt="boba graphic image" />
+    </div>
+        <div class="home-copy">
+            <h2> Your Oasis of Flavorful Delights</h2>
+            <p>Step into the enchanting world of Sips, where every bubble tea is a crafted masterpiece and every visit is a journey of taste and texture. At Sips, we transcend the ordinary, offering an oasis of delightful concoctions that redefine your bubble tea experience. Our commitment to quality starts with sourcing the finest tea leaves and extends to the meticulous preparation of our signature bubbles, ensuring</p>
+            <p>Indulge in a menu that caters to every palate, from classic favorites to innovative blends. Whether you're seeking a moment of relaxation or a vibrant social space, Sips is your go-to destination. Join us in sipping, savoring, and sharing the joy of exceptional bubble tea at Sips – where flavor meets passion, and every cup is a celebration.</p>
+       
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        // Get reference to the Slick Carousel element
+        var slickCarousel = $('#slick-carousel');
+
+        // Initialize Slick Carousel
+        slickCarousel.slick({
+            dots: false,          // Show dots for navigation
+            arrows: false,       // Hide arrow navigation
+            infinite: true,      // Enable infinite loop
+            autoplay: true,      // Autoplay slides
+            autoplaySpeed: 3000, // Autoplay speed in milliseconds
+            fade: true           // Fade effect between slides
+        });
+
+        // Array to store the links for each slide
+        var slideLinks = [
+            '/Menu/MenuIndex',   // Slide 1
+            '/Menu/MilkTea',     // Slide 2
+            '/Menu/FruitTea1',    // Slide 3
+            '/Menu/Slush'        // Slide 4
+        ];
+
+        // Function to update button text and link
+        function updateButton() {
+            var currentSlideIndex = slickCarousel.slick('slickCurrentSlide');
+            var orderButton = $('.register-btn');
+
+            // Check if user is authenticated
+            var isAuthenticated = @Html.Raw(User.Identity.IsAuthenticated.ToString().ToLower());
+
+            if (isAuthenticated) {
+                orderButton.text('Order Now');
+                orderButton.attr('href', slideLinks[currentSlideIndex]);
+            } else {
+                orderButton.text('Create Account');
+                orderButton.attr('href', '/Identity/Account/Register');
+            }
+        }
+
+        // Update button initially
+        updateButton();
+
+        // Update button when slide changes
+        slickCarousel.on('afterChange', function (event, slick, currentSlide) {
+            updateButton();
+        });
+    });
+</script>

@@ -1,0 +1,111 @@
+﻿@model PaginatedList<Sips.ViewModels.ItemVM>
+
+@{
+    ViewData["Title"] = "ItemIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="product-container">
+<h1>Products</h1>
+@ViewBag.Message
+
+<form asp-action="ItemIndex" method="get">
+    <div class="form-actions no-color">
+        <p>
+            <div class="form-group" style="display: inline-block">
+                <span>Search on Product Name or Description:</span>
+                <input type="text" name="SearchString"
+                       value="@ViewData["currentFilter"]" required />
+            </div>
+            <div class="form-group" style="display: inline-block">
+                <input type="submit" value="Search"
+                       class="btn btn-primary" />
+            </div>
+            <a asp-action="ItemIndex">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
+<p>
+    <a asp-action="ItemCreate">Create a New Product</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.ActionLink("Product ID", "ItemIndex", new { sortOrder = ViewBag.IDSortParm })
+
+            </th>
+            <th>
+                @Html.ActionLink("Name", "ItemIndex", new { sortOrder = ViewBag.NameSortParm })
+
+            </th>
+
+            <th>
+                @Html.ActionLink("Base Price", "ItemIndex", new { sortOrder = ViewBag.PriceSortParm })
+
+            </th>
+            <th>
+                @Html.ActionLink("Inventory", "ItemIndex", new { sortOrder = ViewBag.InventorySortParm })
+
+            </th>
+
+
+            <th>
+                @Html.ActionLink("Item Type", "ItemIndex", new { sortOrder = ViewBag.TypeSortParm })
+
+            </th>
+
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ItemId)
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.BasePrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Inventory)
+            </td>
+
+
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemTypeName)
+            </td>
+            <td>
+                <a asp-action="ItemEdit" asp-route-id="@item.ItemId">Edit</a> |
+                <a asp-action="ItemDetails" asp-route-id="@item.ItemId">Details</a> |
+                <a asp-action="ItemDelete" asp-route-id="@item.ItemId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+    
+</table>
+<nav>
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link"
+               href="@Url.Action("ItemIndex", new { pageNumber = Model.PageIndex - 1 })">
+                Previous
+            </a>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link"
+               href="@Url.Action("ItemIndex", new { pageNumber = Model.PageIndex + 1 })">
+                Next
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<a asp-action="Index">Back</a>
+</div>

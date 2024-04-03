@@ -1,0 +1,41 @@
+﻿@model Sips.ViewModels.ContactVM
+
+@{
+    ViewData["Title"] = "ContactDetails";
+}
+<div class="contact-container">
+<h1>Details</h1>
+
+<div>
+    <hr />
+   
+            @Html.DisplayNameFor(model => model.FirstName):
+            @Html.DisplayFor(model => model.FirstName)<br/>
+            @Html.DisplayNameFor(model => model.LastName):
+            @Html.DisplayFor(model => model.LastName)<br />
+            @Html.DisplayNameFor(model => model.BirthDate):
+            @Html.DisplayFor(model => model.BirthDate)<br />
+            @Html.DisplayNameFor(model => model.Email):
+            @Html.DisplayFor(model => model.Email)<br />
+            @Html.DisplayNameFor(model => model.PhoneNumber):
+            @Html.DisplayFor(model => model.PhoneNumber)<br />
+            @Html.DisplayNameFor(model => model.Unit):
+            @Html.DisplayFor(model => model.Unit)<br />
+            @Html.DisplayNameFor(model => model.Street):
+            @Html.DisplayFor(model => model.Street)<br />
+            @Html.DisplayNameFor(model => model.City):
+            @Html.DisplayFor(model => model.City)<br />
+            @Html.DisplayNameFor(model => model.Province):
+            @Html.DisplayFor(model => model.Province)<br />
+            @Html.DisplayNameFor(model => model.PostalCode):
+            @Html.DisplayFor(model => model.PostalCode)
+
+</div>
+    <div class="back-btn">
+    <a asp-action="ContactEdit" asp-route-id="@Model?.UserId">Edit</a>
+    </div>
+    <div class="back-btn">
+  
+    <a asp-action="ContactIndex">Back to List</a>
+</div>
+</div>

@@ -1,0 +1,384 @@
+﻿@model Sips.ViewModels.MenuItemVM
+
+<div class="message-container" >
+    <p class="add-to-cart-message" style="display:none">Item added to cart!</p>
+</div>
+<div class="tea-container">
+    <h1>Fruit Teas</h1>
+    <div class="menu-subheading">
+        <a href="@Url.Action("Slush", "Menu")">
+            <h4>Slushes</h4>
+        </a>
+        <p>|</p>
+        <a href="@Url.Action("MilkTea", "Menu")">
+            <h4>Milk Teas</h4>
+        </a>
+    </div>
+</div>
+
+<div class="tea-list">
+    @foreach (var tea in Model.Items)
+    {
+        <div class="tea-item">
+            <img src="data:image/jpeg;base64,
+                                 @Convert.ToBase64String(tea.Image?.Image)"
+                 alt="@tea.Image?.FileName" class="img-fluid" />
+
+            <div class="tea-copy">
+                <span id="item-@tea.ItemId-id" style="display: none;">@tea.ItemId</span>
+                <h3 id="item-@tea.ItemId-name">@tea.Name</h3>
+                <p id="item-@tea.ItemId-desc">@tea.Description</p>
+                <p>Price: $<span id="item-@tea.ItemId-price">@tea.BasePrice.ToString()</span></p>
+            </div>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="tea-btns">
+
+                    <button class="btn btn-secondary customize" data-bs-toggle="modal" data-bs-target="#customizeModal_@tea.ItemId" data-price="@tea.BasePrice">Customize</button>
+                    <input type="hidden" id="itemPrice_@tea.ItemId" value="@tea.BasePrice" />
+                </div>
+            }
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="customizeModal_@tea.ItemId" tabindex="-1" role="dialog" aria-labelledby="customizeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div style="margin: 0 auto;">
+                            <img style="width: 200px; height: 200px;" src="data:image/jpeg;base64, @Convert.ToBase64String(tea.Image?.Image)" alt="@tea.Image?.FileName" />
+                            <h3>@tea.Name</h3>
+                        </div>
+                        <button type="button" class="close" id="closeModal" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Customization options -->
+                        <div class="customization-options">
+                            <!-- Ice Level Options -->
+                            <div>
+                                <h4>Ice Level:</h4>
+                                <ul>
+                                    @foreach (var option in Model.IceOptions)
+                                    {
+                                        <li>
+                                            <label>
+                                                <input id="item-@tea.ItemId-ice-@option.IcePercent" class="item-@tea.ItemId-ice" type="radio" name="iceOptions_@tea.ItemId" value="@option.IceId" @(option.IcePercent == "Regular Ice" ? "checked" : "")>
+                                                <span id="item-@tea.ItemId-pct-@option.IcePercent class="item-@tea.ItemId-pct">@option.IcePercent</span>
+                                            </label>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <!-- Sweetness Level Options -->
+                            <div>
+                                <h4>Sweetness Level:</h4>
+                                <ul>
+                                    @foreach (var option in Model.SweetnessOptions)
+                                    {
+                                        <li>
+                                            <label>
+                                                <input id="item-@tea.ItemId-sweet-@option.SweetnessPercent" class="item-@tea.ItemId-sweet" type="radio" name="sweetnessOptions_@tea.ItemId" value="@option.SweetnessId" @(option.SweetnessPercent == "100% Sweet" ? "checked" : "")>
+                                                <span id="item-@tea.ItemId-pct-@option.SweetnessPercent" class="item-@tea.ItemId-pct"> @option.SweetnessPercent</span>
+                                            </label>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <!-- Addon Options -->
+                            <div>
+                                <h4>Add Ins:</h4>
+                                <ul>
+                                    @foreach (var option in Model.AddInOptions)
+                                    {
+                                        <li>
+                                            <label>
+                                                <input id="item-@tea.ItemId-addin-@option.AddInName" class="item-@tea.ItemId-addin" type="checkbox" name="addInOptions_@tea.ItemId" value="@option.AddInId" onchange="AddOnPrice('@option.PriceModifier', '@tea.ItemId', this)">
+                                                <span id="item-@tea.ItemId-addin-@option.AddInName" class="item-@tea.ItemId-addin"> @option.AddInName</span> - $@option.PriceModifier
+                                            </label>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <p>$<span id="modalPrice_@tea.ItemId" data-base-price="@tea.BasePrice">@tea.BasePrice</span></p>
+                        <button type="button" class="btn btn-secondary" id="closeModalButton" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="addButton_@tea.ItemId" onclick="AddToCart(@tea.ItemId)" data-bs-dismiss="modal">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to reset form elements inside the modal
+            function resetModal(modalId) {
+                // Reset radio buttons for ice level
+                var iceOptions = document.querySelectorAll('#' + modalId + ' input[name^="iceOptions_"]');
+                iceOptions.forEach(function (input) {
+                    input.checked = input.value === "3"; // Check if the value matches "Regular Ice"
+                });
+                // Reset radio buttons for sweetness level
+                var sweetnessOptions = document.querySelectorAll('#' + modalId + ' input[name^="sweetnessOptions_"]');
+                sweetnessOptions.forEach(function (input) {
+                    console.log(input)
+                    input.checked = input.value === "5"; // Check if the value matches "100% Sweet"
+                });
+                // Reset radio buttons for milk choice
+                var milkOptions = document.querySelectorAll('#' + modalId + ' input[name^="milkOptions_"]');
+                milkOptions.forEach(function (input) {
+                    console.log(input)
+                    input.checked = input.value === "1"; // Check if the value matches "Regular"
+                });
+                // Reset checkboxes for add-ins
+                var addInOptions = document.querySelectorAll('#' + modalId + ' input[name^="addInOptions_"]');
+                addInOptions.forEach(function (input) {
+                    input.checked = input.defaultChecked;
+                });
+
+                // Reset the base price
+                var basePriceElement = document.querySelector('#' + modalId + ' span[id^="modalPrice_"]');
+                if (basePriceElement) {
+                    var initialPrice = basePriceElement.getAttribute('data-base-price');
+                    basePriceElement.textContent = initialPrice;
+                }
+
+            }
+
+            // Get references to the modal and its close buttons
+            var closeModalButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
+            // Add event listener for modal close buttons
+            closeModalButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    // Find the closest modal parent of the button
+                    var modal = button.closest('.modal');
+                    if (modal) {
+                        var modalId = modal.getAttribute('id');
+                        resetModal(modalId);
+                    }
+                });
+            });
+        });
+
+        var totalQuantity = 0;
+        var totalAmount = 0;
+        function generateUniqueItemId(itemId, ice, sweetness, addInNames) {
+            // Convert add-in names array to a string
+            let addInNamesStr = addInNames.map(addIn => addIn.AddInName).join(",");
+            // Create a unique identifier by combining the item ID with selected options
+            let uniqueItemId = `${itemId}-${ice}-${sweetness}-${addInNamesStr}`;
+            // Use a simple hash function or encoding if necessary to shorten or standardize the unique ID
+            return uniqueItemId;
+        }
+
+        function AddToCart(itemId) {
+            // Show the add to cart message
+            $('.add-to-cart-message').fadeIn('slow');
+            // Set a timeout to hide the message after 5 seconds
+            setTimeout(function () {
+                $('.add-to-cart-message').fadeOut('slow');
+            }, 1500);
+            // temporarily update the cart total until page is refreshed
+            var checkoutTotal = document.getElementById('checkout-icon');
+            var quantity = checkoutTotal.getAttribute('value');
+
+            var intTotal = parseInt(quantity) + 1;
+
+            // Update the data-value attribute with the new total
+            checkoutTotal.setAttribute('value', intTotal);
+
+            // Collect item details
+            var iceLabel = document.querySelector('input[name="iceOptions_' + itemId + '"]:checked').nextElementSibling;
+            var ice = iceLabel ? iceLabel.textContent.trim() : '';
+
+            var sweetnessLabel = document.querySelector('input[name="sweetnessOptions_' + itemId + '"]:checked').nextElementSibling;
+            var sweetness = sweetnessLabel ? sweetnessLabel.textContent.trim() : '';
+
+            var addInOptions = document.querySelectorAll('input[name="addInOptions_' + itemId + '"]:checked');
+
+            var addInNames = [];
+            addInOptions.forEach(function (option) {
+                var addInLabel = option.nextElementSibling;
+                if (addInLabel) {
+                    var addInName = addInLabel.textContent.trim();
+                    addInNames.push({
+                        AddInName: addInName,
+                        // You can add other properties of AddIn here if needed
+                    });
+                }
+            });
+
+            var uniqueItemId = generateUniqueItemId(
+                itemId,
+                ice,
+                sweetness,
+                addInNames // Make sure this is the array of objects {AddInName: "name"}
+            );
+
+            var item = {
+                ItemId: itemId,
+                UniqueItemId: uniqueItemId,
+                BasePrice: parseFloat($('#item-' + itemId + '-price').html()),
+                SubTotal: parseFloat($('#modalPrice_' + itemId).html()),
+                Name: $('#item-' + itemId + '-name').html(),
+                IcePercent: ice,
+                SweetnessPercent: sweetness,
+                AddInNames: addInNames,
+                Quantity: 1// Assign the populated list of AddInOrderDetail objects
+            };
+
+            // Get selected options from the modal
+            var modalId = 'customizeModal_' + itemId;
+            var iceOptions = document.querySelectorAll('#' + modalId + ' input[name="iceOptions"]:checked');
+            var sweetnessOptions = document.querySelectorAll('#' + modalId + ' input[name="sweetnessOptions"]:checked');
+            var addInOptions = document.querySelectorAll('#' + modalId + ' input[name="addInOptions"]:checked');
+            // Update item object with selected options
+            if (iceOptions.length > 0) {
+                item.ice = iceOptions[0].value;
+            }
+            if (sweetnessOptions.length > 0) {
+                item.sweetness = sweetnessOptions[0].value;
+            }
+            addInOptions.forEach(function (option) {
+                item.addInNames.push(option.value);
+                item.addInPriceModifiers.push(parseFloat(option.getAttribute('data-price-modifier')));
+            });
+            console.log(item);
+            // Send item details to the server to add to the cart
+            fetch('/Transaction/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(item)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("added to cart");
+                        // Optionally, update the UI to reflect that the item was added to the cart
+                    } else {
+                        // Handle errors if needed
+                        console.log('FAIL');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Handle errors if needed
+                });
+        }
+
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2) + ' ' + 'CAD';
+        }
+
+        // function to handle milk price modifiers
+        function AdjustPrice(price, priceModifier, id, checkbox) {
+            var basePrice = document.getElementById("modalPrice_" + id);
+            var price = parseFloat(basePrice.textContent);
+            var newPrice = price - currentPriceModifier;
+            newTotal = newPrice + parseFloat(priceModifier);
+            basePrice.textContent = (newTotal).toFixed(2);
+            currentPriceModifier = priceModifier;
+        }
+
+        // Keep track of the current price modifier
+        var currentPriceModifier = 0;
+
+        //function to handle add on price modifiers
+        function AddOnPrice(priceModifier, id, checkbox) {
+            console.log(checkbox.checked)
+            // if checkbox is checked, add the price modifier to the total
+            if (checkbox.checked) {
+                var basePrice = document.getElementById('modalPrice_' + id);
+                console.log(basePrice.textContent);
+                var price = parseFloat(basePrice.textContent);
+                console.log(price == 4.99);
+                var newTotal = price + parseFloat(priceModifier);
+                basePrice.textContent = (newTotal).toFixed(2)
+            }
+            // if checkbox is unchecked, subtract the price modifier from the total
+            else {
+                var basePrice = document.getElementById('modalPrice_' + id);
+                var price = parseFloat(basePrice.textContent);
+                var newTotal = price - parseFloat(priceModifier);
+                basePrice.textContent = (newTotal).toFixed(2);
+            }
+        }
+    </script>
+}
+
+<style>
+    /* Customize modal appearance */
+    .modal-content {
+        border-radius: 20px;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .customization-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 20px;
+    }
+
+        .customization-options h4 {
+            font-size: 16px;
+            margin-top: 0;
+        }
+
+        .customization-options ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .customization-options label {
+            font-size: 14px;
+        }
+
+        .customization-options input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+    /* Customize close button */
+    #closeModal {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        color: #888;
+        border: none;
+        background: none;
+        cursor: pointer;
+    }
+
+    .add-to-cart-message {
+        display: none;
+        position: absolute;
+        background-color: #E4F2EE;
+        color: #519389;
+        margin-right: 40px;
+        margin-top: 5px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .message-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+</style>

@@ -1,0 +1,33 @@
+﻿/*login page*/
+.row {
+    justify-content: center;
+}
+
+.login-button-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+#login-register-link {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#login-title {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 15px;
+}
+
+#login-page {
+    align-items: center;
+}
+
+#login-submit {
+    width: 80px;
+    height: 40px;
+    border-radius: 4px;
+    background-color: rgb(231, 242, 238);
+    border-color: rgb(231, 242, 238);
+    border: 0;
+}

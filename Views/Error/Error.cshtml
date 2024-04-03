@@ -1,0 +1,65 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Error";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
+<div class="errorcontainer">
+    <div class="errorbackground">
+        @Model
+    </div>
+
+    <img id="errorimagebackground" src="~/images/error-image.png" alt="error image" />
+
+
+    <div class="errortext">
+        <p>
+            "Oopsie-doodle! It seems you've entered the whimsical land of tapioca dreams,🌈🧋
+            <br />
+            but this particular bubble burst on our website. Our tea-m of tech wizards is on the case,
+            concocting a potion to revive this page. While you wait, why not practice your bubble blowing skills or
+            attempt to master the art of tea leaf origami? The magic of boba will be back soon – stay steeped!"
+            <br />
+
+        </p>
+    </div>
+
+</div>
+
+<style>
+    .errorcontainer {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        height: 65.9vh;
+    }
+
+    .errorbackground {
+        font-family: 'Pixelify Sans', sans-serif;
+        font-size: 40rem;
+        position: absolute;
+        z-index: -1;
+        color: #A3CCFF;
+        opacity: 0.3;
+    }
+
+
+    #errorimagebackground {
+        position: absolute;
+        z-index: -1;
+        margin-bottom: 10px;
+    }
+
+
+    .errortext {
+        font-size: 19px;
+        font-family: 'Pixelify Sans', sans-serif;
+        max-width: 70%;
+        margin-top: 29rem;
+    }
+</style>

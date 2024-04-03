@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Sips Menu";
+}
+
+<div class="menu-container">
+    <div class="menuindex-description">
+        <h2>SIPS BUBBLE TEA MENU</h2>
+        <p>
+            Welcome to Sips, where refreshment meets innovation. Dive into the creamy allure of our Milk Tea, savor the
+            natural burst of flavors in our Fruit Tea, or indulge in the frosty goodness of our Slush offerings. Customize
+            your experience with a range of toppings, from chewy boba pearlsto fruity bubbles. At Sips, your perfect
+            blend awaits – join us for a taste adventure!
+        </p>
+    </div>
+
+    <h1 class="text-center" id="menu-title">Discover</h1>
+
+    <div class="drink-images">
+        <div class="row">
+            <div class="col-md-4">
+                <a href="@Url.Action("MilkTea", "Menu")">
+                    <h4>Milk Teas</h4>
+                    <img src="~/images/milk.jpg" alt="Milk Tea" class="img-fluid">
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="@Url.Action("FruitTea1", "Menu")">
+                    <h4>Fruit Teas</h4>
+                    <img src="~/images/fruit.jpg" alt="Fruit Tea" class="img-fluid">
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="@Url.Action("Slush", "Menu")">
+                    <h4>Slushes</h4>
+                    <img src="~/images/slushie.jpg" alt="Slush" class="img-fluid">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

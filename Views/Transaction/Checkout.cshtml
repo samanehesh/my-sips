@@ -1,0 +1,442 @@
+﻿@model IEnumerable<Sips.ViewModels.CartVM>
+
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="message-container">
+    <p class="add-to-cart-message" style="display:none">Item added to cart!</p>
+    <p id="remove-from-cart-message" style="display:none">Item removed from cart!</p>
+</div>
+<div class="checkout-section">
+
+    <div class="checkout-box">
+    <h1>Checkout</h1>
+    <div class="checkout-container">
+        <!-- Add logic to hide/show cart items based on cart emptiness -->
+
+        <div class="checkout-headers">
+                <p class="checkout-item-name">Item</p>
+            <p>Quantity</p>
+            <p>Price</p>
+            <p>Subtotal</p>
+        </div>
+        @if (Model.Any())
+        {
+            <div class="checkout-items">
+                @foreach (var item in Model)
+                {
+                    <div class="checkout-item">
+                    <div class="checkout-item-name">
+                    <button class="btn btn-checkout" data-modal="myModal" uniqueitemid="@item.UniqueItemId">@item.Name</button>
+                   </div>
+                    <div class="item-subqty">
+                        <button class="qty-btn" type="button" onclick="RemoveOne('@item.UniqueItemId')">-</button>
+                            <p class="subtotal-qty" id="subtotal-qty_@item.UniqueItemId">@item.Quantity</p>
+                        <button class="qty-btn" type="button" onclick="AddOne('@item.UniqueItemId')">+</button>
+                    </div>
+                    @* <div class="checkout-subtotals"> *@
+                                <p class="subtotal-amount" id="subtotal-amount_@item.UniqueItemId">$@item.Subtotal</p> 
+                                <p class="subtotal-amount-qty" id="subtotal-amount-qty_@item.UniqueItemId">$@((item.Subtotal * item.Quantity).ToString("F2"))</p>
+                   
+                    </div>
+                }
+            </div>
+
+                <div class="checkout-details">
+                    <div class="order-details">
+                        <p>Grand Total:</p>
+                        <p><span id="grandTotalQty">0</span></p>
+                        <p><span id="grandTotalAmount">$0.00</span></p>
+                    </div>
+                    <input type="hidden" value="USD" id="currency" />
+                    <div id="paypal-button-container"></div>
+                </div>
+        }
+        else
+        {
+            <div class="empty-cart-message">
+                <p>Cart is Empty!</p>
+                <a class="empty-card-link" asp-area="" asp-controller="Menu" asp-action="MenuIndex">Add A Drink Now!</a>
+             </div>
+        }
+
+    </div>
+</div>
+</div>
+
+
+<!-- Modals -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-dialog cart-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cart</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div id="cart-container" class="modal-body cart-container">
+                    </div>                    
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="https://www.paypal.com/sdk/js?client-id=@ViewData["PayPalClientId"]"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Get all buttons with the class "btn-outline-dark"
+        var buttons = document.querySelectorAll('.btn-checkout');
+
+        //Add event listener to each button
+        buttons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Get the modal ID from the button's data-modal attribute
+                var cartContainer = document.getElementById('cart-container');
+                cartContainer.innerHTML = '';
+
+                var modalId = button.getAttribute('data-modal');
+                var uniqueItemId = button.getAttribute('uniqueitemid');
+
+                fetch('/Transaction/GetCartItems?itemId=' + uniqueItemId, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        // Add any other headers if needed
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Process the data returned from the server
+                        console.log(JSON.stringify(data));
+                        if (data && data.length > 0) {
+                            data.forEach(item => {
+                                // Create elements and append them to the cart container
+                                var itemElement = document.createElement('div');
+                                itemElement.innerHTML = `
+                                    <h5>${item.name}</h5>
+                                    <p>Sweetness: ${item.sweetnessPercent}</p>
+                                    <p>Milk: ${item.milkType}</p>
+                                    <p>Ice: ${item.icePercent}</p>
+                                    <div class="add-ins">
+                                        <p style="font-weight:bold">Add-Ins: </p>
+                                        ${item.addInNames.map(addIn => `<p>${addIn.addInName}</p>`).join('')}
+                                    </div>
+                                    <h5 class="subtotal">Subtotal: $${item.subtotal}</h5>
+                                    `;
+                                cartContainer.appendChild(itemElement);
+                            });
+                        }
+
+                        // Display the modal using Bootstrap's modal method
+                        var modal = new bootstrap.Modal(document.getElementById(modalId));
+                        modal.show();
+
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+
+
+    // Calculate total when the page loads
+    calculateTotal();
+
+    function calculateTotal() {
+        var subtotalElements = document.querySelectorAll('.subtotal-amount');
+        var subtotalQtys = document.querySelectorAll('.subtotal-qty');
+        console.log(subtotalElements);
+        console.log(subtotalQtys);
+        var grandTotalAmount = 0;
+        var grandTotalQty = 0;
+
+        subtotalElements.forEach(function (subtotalElement, index) {
+            var subtotal = parseFloat(subtotalElement.textContent.replace('$', '')); // Get the price per item
+            console.log(subtotal);
+            var qty = parseInt(subtotalQtys[index].textContent); // Get the quantity
+            console.log(qty);
+
+            var itemSubtotal = subtotal * qty; // Calculate the subtotal for the current item
+            grandTotalAmount += itemSubtotal; // Add the item subtotal to the grand total
+
+            grandTotalQty += qty; // Add the quantity of the current item to the grand total quantity
+        });
+
+        // Update grand total only if the elements exist
+        var grandTotalAmountElement = document.getElementById('grandTotalAmount');
+        var grandTotalQtyElement = document.getElementById('grandTotalQty');
+
+        if (grandTotalAmountElement && grandTotalQtyElement) {
+            grandTotalAmountElement.textContent = '$' + grandTotalAmount.toFixed(2);
+            grandTotalQtyElement.textContent = grandTotalQty;
+        } else {
+            console.error("One or both of the grand total elements are not found.");
+        }
+    }
+
+    function AddOne(uniqueItemId) {
+        fetch(`/Transaction/AddOneToCart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(uniqueItemId)
+        })
+            .then(response => response.json()) // Extract JSON from the response
+            .then(data => {
+                console.log(data);
+                if (data && data.newItem) {
+                    // You can access newItem properties here and update the UI accordingly
+                    console.log(data.newItem);
+                    // Example: Update the quantity displayed on the UI
+                    //document.getElementById('quantityDisplay').textContent = data.newItem.Quantity;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors if the fetch request fails
+                // Optionally, display an error message to the user
+            });
+
+        // Show the add to cart message
+        $('.add-to-cart-message').fadeIn('slow');
+        // Set a timeout to hide the message after 5 seconds
+        setTimeout(function () {
+            $('.add-to-cart-message').fadeOut('slow');
+        }, 1500);
+        
+        
+        // temporarily update the cart total until page is refreshed
+        var checkoutTotal = document.getElementById('checkout-icon');
+        var quantity = checkoutTotal.getAttribute('value');
+        console.log('quantity:', quantity);
+
+        var intTotal = parseInt(quantity) + 1;
+        console.log('intTotal:', intTotal);
+
+        // Update the data-value attribute with the new total
+        checkoutTotal.setAttribute('value', intTotal);
+
+        var grandtotalQuantity = document.getElementById("subtotal-qty_" + uniqueItemId);
+        console.log(grandtotalQuantity);
+        var intQuantity = parseInt(grandtotalQuantity.textContent);
+        grandtotalQuantity.textContent = intQuantity + 1;
+
+        // Assuming the subtotal-amount is always the price for one unit
+        var subtotalElement = document.getElementById("subtotal-amount_" + uniqueItemId);
+        var updateElement = document.getElementById("subtotal-amount-qty_" + uniqueItemId);
+        var unitPrice = parseFloat(subtotalElement.textContent.replace('$', ''));
+        var currentTotal = parseFloat(updateElement.textContent.replace('$', ''));
+        var newTotal = currentTotal + unitPrice;
+        updateElement.textContent = `$${newTotal.toFixed(2)}`;
+        calculateTotal();
+    }
+
+
+    // remove same product from cart
+
+    function RemoveOne(uniqueItemId) {
+        // Display a confirmation dialog before removing the item
+        fetch(`/Transaction/RemoveFromCart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(uniqueItemId)
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Item removed from cart successfully");
+                    // Optionally, update the UI to reflect that the item was removed from the cart
+                } else {
+                    // Handle errors if removal fails
+                    console.log('Failed to remove item from cart');
+                    // Optionally, display an error message to the user
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors if the fetch request fails
+                // Optionally, display an error message to the user
+            });
+
+        // Show the remove from cart message
+        $('#remove-from-cart-message').fadeIn('slow');
+        // Set a timeout to hide the message after 5 seconds
+        setTimeout(function () {
+            $('#remove-from-cart-message').fadeOut('slow');
+        }, 1500);
+
+        
+        // temporarily update the cart total until page is refreshed
+        var checkoutTotal = document.getElementById('checkout-icon');
+        var quantity = checkoutTotal.getAttribute('value');
+        console.log('quantity:', quantity);
+
+        // Parse quantity as an integer
+        var intTotal = parseInt(quantity);
+
+        // Ensure the quantity won't go below 0
+        if (intTotal > 0) {
+            intTotal--; // Decrement the quantity
+            console.log('intTotal:', intTotal);
+
+            // Update the data-value attribute with the new total
+            checkoutTotal.setAttribute('value', intTotal);
+        }
+        var grandtotalQuantity = document.getElementById("subtotal-qty_" + uniqueItemId);
+        console.log(grandtotalQuantity);
+
+        // Parse the quantity as an integer
+        var intQuantity = parseInt(grandtotalQuantity.textContent);
+
+        // Ensure the quantity won't go below zero
+        if (intQuantity > 0) {
+            intQuantity--; // Decrement the quantity
+            console.log('intQuantity:', intQuantity);
+
+            // Update the quantity
+            grandtotalQuantity.textContent = intQuantity;
+        }
+
+        // Assuming the subtotal-amount is always the price for one unit
+        var subtotalElement = document.getElementById("subtotal-amount_" + uniqueItemId);
+        var updateElement = document.getElementById("subtotal-amount-qty_" + uniqueItemId);
+        var unitPrice = parseFloat(subtotalElement.textContent.replace('$', ''));
+        var currentTotal = parseFloat(updateElement.textContent.replace('$', ''));
+        var newTotal = currentTotal - unitPrice;
+        if (newTotal >= 0) { // Prevents the total from going negative
+            updateElement.textContent = `$${newTotal.toFixed(2)}`;
+        }
+        calculateTotal();
+    }
+
+</script>
+
+
+<script>
+    paypal.Buttons({
+        // Set up the transaction
+        createOrder: function (data, actions) {
+            var totalAmount = parseFloat(document.getElementById('grandTotalAmount').innerText.replace(/[^\d.-]/g, ''));
+            console.log('Total Amount:', totalAmount); // Log the total amount for debugging
+
+
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: totalAmount.toFixed(2), // Format the value as needed
+                        currency: 'CAD' // Replace with the appropriate currency code
+                    }
+                }]
+            });
+        },
+
+        // Finalize the transaction
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(function (details) {
+                // Prepare PayPalVM object
+                const payPalVM = {
+                    TransactionId: details.id,
+                    Amount: details.purchase_units[0].amount.value,
+                    Currency: details.purchase_units[0].amount.currency_code,
+                    PaymentMethod: 'PayPal',
+                    PayerName: "",
+                    CreatedDate: details.create_time, // Assuming this is in the correct format
+                    PayerEmail: details.payer.email_address,
+                    isFullfilled: false,
+                    CurrencySymbol: "$",
+                    PayerId: details.payer.payer_id,
+                    PayerFullName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+                    CaptureId: details.purchase_units[0].payments.captures[0].id
+                };
+
+                console.log(JSON.stringify(payPalVM));
+
+                // Send PayPalVM object to the server using fetch
+                fetch('/Transaction/PaySuccess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // Update Accept header to expect JSON
+                    },
+                    body: JSON.stringify(payPalVM)
+                    
+                })
+                    .then(response => {
+                        console.log(response); // Log the raw response
+                        // Check if the response is HTML
+                        if (response.headers.get('Content-Type').includes('text/html')) {
+                            // Handle HTML response
+                            return response.text(); // or use response.text() directly
+                        }
+                        // Otherwise, proceed with JSON parsing
+                        return response.json();
+                    })
+                    .then(responseData => {
+                        // Handle the JSON response from the server
+                        console.log(responseData);
+
+                        // Check if responseData contains redirectUrl
+                        if (responseData.redirectUrl) {
+                            // Redirect to the specified URL
+                            window.location.href = responseData.redirectUrl;
+                        } else {
+                            // Handle the response data accordingly
+                        }
+                    })
+                    .catch(error => {
+                        // Handle any errors that occur during the fetch
+                        console.error('Error:', error);
+                    });
+            });
+        },
+
+
+        onCancel: function (data) {
+            alert('Transaction was cancelled.');
+        },
+        onError: function (err) {
+            //alert('An error occurred during the transaction.');
+            console.log(err);
+        },
+        style: {
+            layout: 'horizontal', // 'vertical', 'horizontal'
+            color: 'black',      // 'gold', 'blue', 'silver', 'black'
+            shape: 'pill',        // 'rect', 'pill'
+            label: 'checkout',    // 'checkout', 'pay', 'buynow', 'paypal'
+            fundingicons: false,  // Hide the funding icons (debit/credit card)
+        }
+    }).render('#paypal-button-container');
+</script>
+<style>
+    .add-to-cart-message, #remove-from-cart-message {
+        display: none;
+        position: absolute;
+        background-color: #E4F2EE;
+        color: #519389;
+        margin-right: 40px;
+        margin-top: 5px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .message-container {
+        display: flex;
+        justify-content: flex-end;
+    }
+</style>

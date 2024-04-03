@@ -1,0 +1,36 @@
+﻿@model Sips.ViewModels.UserRoleVM
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string message = ViewBag.ErrorMessage;
+}
+<div class="product-container">
+
+<h1 class="role-title">Delete</h1>
+@message
+
+<h3 id="user-role-delete-title">Are you sure you want to delete this?</h3>
+<div>
+    <table class="table" id="user-role-delete-table">
+        <thead>
+            <tr>
+                <th id="delete-role-rolename">@Html.DisplayNameFor(model => model.RoleName)</th>
+                <th id="delete-role-email">@Html.DisplayNameFor(model => model.Email)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Html.DisplayFor(model => model.RoleName)</td>
+                <td>@Html.DisplayFor(model => model.Email)</td>
+            </tr>
+        </tbody>
+    </table>
+    <form asp-action="Delete" asp-controller="UserRole" method="post">
+        <input asp-for=@Model.RoleName type="hidden" value=@Model.RoleName />
+        <input asp-for=@Model.Email type="hidden" value=@Model.Email />
+        <input type="submit" value="Delete" class="btn btn-primary " /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>
+</div>

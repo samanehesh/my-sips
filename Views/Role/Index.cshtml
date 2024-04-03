@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Sips.ViewModels.RoleVM>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="product-container">
+
+<h1 class="role-title">Roles</h1>
+
+<p>
+    <a asp-action="Create">Create New Role</a>
+</p>
+<table class="table">
+    <thead style="color: #345e57">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RoleName)
+            </th>
+        </tr>
+    </thead>
+    <tbody style="color: #478279">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RoleName)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-controller="Admin" asp-action="RoleIndex">Back</a>
+</div>

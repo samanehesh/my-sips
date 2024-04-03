@@ -1,0 +1,68 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Error";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
+<div class="errorcontainer">
+    <div class="errorbackground">
+        @Model
+    </div>
+
+    <img id="errorimagebackground" src="~/images/404-image.png" alt="404 image" />
+
+
+    <div class="errortext">
+        <p>
+            🏃
+            "Uh-oh, it seems our bubble tea has gone on a little adventure!🏃🧋
+
+            <br />
+            While we hunt down the runaway tapioca,
+            why not enjoy some virtual tea leaves reading?
+            <br />
+            Or just sit back, relax, and pretend you're sipping on your favorite flavor.
+            We'll have this page brewing again in no time!"
+        </p>
+    </div>
+
+
+</div>
+
+<style>
+    .errorcontainer {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        height: 65.9vh;
+    }
+
+    .errorbackground {
+        font-family: 'Pixelify Sans', sans-serif;
+        font-size: 40rem;
+        position: absolute;
+        z-index: -1;
+        color: #A3CCFF;
+        opacity: 0.3;
+    }
+
+
+    #errorimagebackground {
+        position: absolute;
+        z-index: -1;
+        margin-bottom: 10px;
+    }
+
+
+    .errortext {
+        font-size: 19px;
+        font-family: 'Pixelify Sans', sans-serif;
+        max-width: 70%;
+        margin-top: 29rem;
+    }
+</style>
